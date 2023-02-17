@@ -196,6 +196,7 @@ static pthread_once_t hwinfo_init_control = PTHREAD_ONCE_INIT;
 #endif /* !NNP_CONVOLUTION_ONLY */
 
 static void init_hwinfo(void) {
+	//printf("\n I am in inithwinfo\n");
 	#if (CPUINFO_ARCH_X86 || CPUINFO_ARCH_X86_64) && !defined(__ANDROID__)
 		init_x86_hwinfo();
 	#elif !CPUINFO_ARCH_X86 && !CPUINFO_ARCH_X86_64 && defined(__APPLE__)
@@ -224,6 +225,7 @@ static void init_hwinfo(void) {
 			nnp_hwinfo.blocking.l3 -= nnp_hwinfo.cache.l2.size;
 		}
 	}
+//	printf("after cache level\n");
 	nnp_hwinfo.blocking.l4 = nnp_hwinfo.cache.l4.size;
 	if (nnp_hwinfo.cache.l1.size && nnp_hwinfo.cache.l2.size && nnp_hwinfo.cache.l3.size) {
 		#if NNP_BACKEND_X86_64
@@ -386,8 +388,11 @@ static void init_hwinfo(void) {
 #endif /* !NNP_INFERENCE_ONLY */
 			};
 			nnp_hwinfo.supported = true;
-		#elif NNP_BACKEND_ARM
-			nnp_hwinfo.simd_width = 4;
+		#elif NNP_BACKEND_SVE
+		//	printf("in arm init\n");
+			nnp_hwinfo.simd_width = 4;  //original
+			nnp_hwinfo.sve_simd_width = svcntw();//64;  
+			nnp_hwinfo.globalinterchannels = nnp_hwinfo.sve_simd_width/4;//16;
 			nnp_hwinfo.transforms.fft8x8_with_offset_and_store = (nnp_transform_2d_with_offset) nnp_fft8x8_with_offset__psimd;
 			nnp_hwinfo.transforms.fft8x8_with_offset_and_stream = (nnp_transform_2d_with_offset) nnp_fft8x8_with_offset__psimd;
 #if !NNP_INFERENCE_ONLY
@@ -404,6 +409,7 @@ static void init_hwinfo(void) {
 			nnp_hwinfo.transforms.ifft16x16_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_ifft16x16_with_bias_with_relu__psimd;
 			nnp_hwinfo.transforms.iwt_f6x6_3x3_with_offset_and_store = (nnp_transform_2d_with_offset) nnp_iwt8x8_3x3_with_offset__neon;
 			nnp_hwinfo.transforms.iwt_f6x6_3x3_with_offset_and_stream = (nnp_transform_2d_with_offset) nnp_iwt8x8_3x3_with_offset__neon;
+			//nnp_hwinfo.transforms.iwt_f6x6_3x3_with_offset_and_stream_intertile = (nnp_transform_2d_with_offset_intertile) nnp_iwt8x8_3x3_with_offset__neon_intertile;// added by sonia
 			nnp_hwinfo.transforms.kwt_f6x6_3x3 = (nnp_transform_2d_with_offset) nnp_kwt8x8_3x3__neon;
 #if !NNP_INFERENCE_ONLY
 			nnp_hwinfo.transforms.kwt_f6x6_3Rx3R = (nnp_transform_2d_with_offset) nnp_kwt8x8_3Rx3R__neon;
@@ -451,8 +457,8 @@ static void init_hwinfo(void) {
 				.upto_mr_x_nr = nnp_sgemm_upto_6x8__neon,
 			};
 			nnp_hwinfo.sxgemm = (struct sxgemm) {
-				.mr = 3,
-				.nr = 3,
+				.mr =16, //sonia changed from 3 to 8
+				.nr = 16,  // sonia changed from 3 to 8 
 				#if CPUINFO_ARCH_ARM
 					.only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4gemm_only_3x3__aarch32_neon,
 				#else
@@ -460,6 +466,162 @@ static void init_hwinfo(void) {
 				#endif
 				.upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_s4gemm_upto_3x3__neon,
 			};
+			#if CPUINFO_ARCH_ARM
+				if (cpuinfo_has_arm_neon_fma()) {
+					nnp_hwinfo.sxgemm.only_mr_x_nr =
+						(nnp_fast_tuple_gemm_function) nnp_s4gemm_only_3x3__aarch32_neon2;
+				}
+			#endif
+			if (cpuinfo_has_arm_neon_fp16()) {
+				nnp_hwinfo.hxgemm = (struct hxgemm) {
+					.mr = 3,
+					.nr = 3,
+					.only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_h4gemm_only_3x3__neonhp,
+					.upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_h4gemm_upto_3x3__neonhp,
+				};
+			}
+			#if CPUINFO_ARCH_ARM
+				if (cpuinfo_has_arm_neon_fp16_arith()) {
+					nnp_hwinfo.hxgemm.only_mr_x_nr =
+						(nnp_fast_tuple_gemm_function) nnp_h4gemm_only_3x3__aarch32_neonhparith;
+					nnp_hwinfo.hxgemm.upto_mr_x_nr =
+						(nnp_full_tuple_gemm_function) nnp_h4gemm_upto_3x3__aarch32_neon2;
+				} else if (cpuinfo_has_arm_neon_fma()) {
+					nnp_hwinfo.hxgemm.only_mr_x_nr =
+						(nnp_fast_tuple_gemm_function) nnp_h4gemm_only_3x3__aarch32_neon2;
+					nnp_hwinfo.hxgemm.upto_mr_x_nr =
+						(nnp_full_tuple_gemm_function) nnp_h4gemm_upto_3x3__aarch32_neon2;
+				} else if (cpuinfo_has_arm_neon_fp16()) {
+					nnp_hwinfo.hxgemm.only_mr_x_nr =
+						(nnp_fast_tuple_gemm_function) nnp_h4gemm_only_3x3__aarch32_neonhp;
+				}
+			#endif
+			nnp_hwinfo.cxgemm = (struct cxgemm) {
+				.mr = 2,
+				.nr = 2,
+#if !NNP_INFERENCE_ONLY
+				.s4cX_only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4c2gemm_only_2x2__neon,
+				.s4cX_upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_s4c2gemm_upto_2x2__neon,
+				.cX_only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_c4gemm_only_2x2__neon,
+				.cX_upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_c4gemm_upto_2x2__neon,
+#endif /* !NNP_INFERENCE_ONLY */
+				.s4cX_conjb_only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4c2gemm_conjb_only_2x2__neon,
+				.s4cX_conjb_upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_s4c2gemm_conjb_upto_2x2__neon,
+				.cX_conjb_only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_c4gemm_conjb_only_2x2__neon,
+				.cX_conjb_upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_c4gemm_conjb_upto_2x2__neon,
+#if !NNP_INFERENCE_ONLY
+				.s4cX_conjb_transc_only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4c2gemm_conjb_transc_only_2x2__neon,
+				.s4cX_conjb_transc_upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_s4c2gemm_conjb_transc_upto_2x2__neon,
+				.cX_conjb_transc_only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_c4gemm_conjb_transc_only_2x2__neon,
+				.cX_conjb_transc_upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_c4gemm_conjb_transc_upto_2x2__neon,
+#endif /* !NNP_INFERENCE_ONLY */
+			};
+			nnp_hwinfo.supported = cpuinfo_has_arm_neon();
+		#elif NNP_BACKEND_ARM
+		//	printf("in arm init\n");
+			nnp_hwinfo.simd_width = 4;  //original
+			nnp_hwinfo.sve_simd_width = svcntw();//64;  
+			nnp_hwinfo.globalinterchannels = nnp_hwinfo.sve_simd_width/4;//16;
+			nnp_hwinfo.transforms.fft8x8_with_offset_and_store = (nnp_transform_2d_with_offset) nnp_fft8x8_with_offset__psimd;
+			nnp_hwinfo.transforms.fft8x8_with_offset_and_stream = (nnp_transform_2d_with_offset) nnp_fft8x8_with_offset__psimd;
+#if !NNP_INFERENCE_ONLY
+			nnp_hwinfo.transforms.ifft8x8_with_offset = (nnp_transform_2d_with_offset) nnp_ifft8x8_with_offset__psimd;
+#endif /* !NNP_INFERENCE_ONLY */
+			nnp_hwinfo.transforms.ifft8x8_with_bias = (nnp_transform_2d_with_bias) nnp_ifft8x8_with_bias__psimd;
+			nnp_hwinfo.transforms.ifft8x8_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_ifft8x8_with_bias_with_relu__psimd;
+			nnp_hwinfo.transforms.fft16x16_with_offset_and_store = (nnp_transform_2d_with_offset) nnp_fft16x16_with_offset__psimd;
+			nnp_hwinfo.transforms.fft16x16_with_offset_and_stream = (nnp_transform_2d_with_offset) nnp_fft16x16_with_offset__psimd;
+#if !NNP_INFERENCE_ONLY
+			nnp_hwinfo.transforms.ifft16x16_with_offset = (nnp_transform_2d_with_offset) nnp_ifft16x16_with_offset__psimd;
+#endif /* !NNP_INFERENCE_ONLY */
+			nnp_hwinfo.transforms.ifft16x16_with_bias = (nnp_transform_2d_with_bias) nnp_ifft16x16_with_bias__psimd;
+			nnp_hwinfo.transforms.ifft16x16_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_ifft16x16_with_bias_with_relu__psimd;
+			nnp_hwinfo.transforms.iwt_f6x6_3x3_with_offset_and_store = (nnp_transform_2d_with_offset) nnp_iwt8x8_3x3_with_offset__neon;
+			nnp_hwinfo.transforms.iwt_f6x6_3x3_with_offset_and_stream = (nnp_transform_2d_with_offset) nnp_iwt8x8_3x3_with_offset__neon;
+			//nnp_hwinfo.transforms.iwt_f6x6_3x3_with_offset_and_stream_intertile = (nnp_transform_2d_with_offset_intertile) nnp_iwt8x8_3x3_with_offset__neon_intertile;// added by sonia
+			#if SVE
+			nnp_hwinfo.transforms.kwt_f6x6_3x3 = (nnp_transform_2d_with_offset) nnp_kwt8x8_3x3__sve;
+			#else
+			nnp_hwinfo.transforms.kwt_f6x6_3x3 = (nnp_transform_2d_with_offset) nnp_kwt8x8_3x3__neon;
+			#endif
+#if !NNP_INFERENCE_ONLY
+			nnp_hwinfo.transforms.kwt_f6x6_3Rx3R = (nnp_transform_2d_with_offset) nnp_kwt8x8_3Rx3R__neon;
+			nnp_hwinfo.transforms.owt_f6x6_3x3 = (nnp_transform_2d_with_offset) nnp_owt8x8_3x3__neon;
+#endif /* !NNP_INFERENCE_ONLY */
+			#if SVE	
+			nnp_hwinfo.transforms.owt_f6x6_3x3_with_bias = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3_with_bias__sve;
+			#else
+			nnp_hwinfo.transforms.owt_f6x6_3x3_with_bias = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3_with_bias__neon;
+			#endif
+			#if SVE
+			nnp_hwinfo.transforms.owt_f6x6_3x3s2_with_bias = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3s2_with_bias__sve;
+			nnp_hwinfo.transforms.owt_f6x6_3x3_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3_with_bias_with_relu__sve;
+			nnp_hwinfo.transforms.owt_f6x6_3x3s2_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3s2_with_bias_with_relu__sve;
+			#else	
+			nnp_hwinfo.transforms.owt_f6x6_3x3s2_with_bias = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3s2_with_bias__neon;
+			nnp_hwinfo.transforms.owt_f6x6_3x3_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3_with_bias_with_relu__neon;
+			nnp_hwinfo.transforms.owt_f6x6_3x3s2_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3s2_with_bias_with_relu__neon;
+			#endif
+			if (cpuinfo_has_arm_neon_fp16()) {
+				nnp_hwinfo.transforms.iwt_f6x6_3x3_fp16_with_offset = (nnp_transform_2d_with_offset) nnp_iwt8x8_3x3_fp16_with_offset__neonhp;
+				nnp_hwinfo.transforms.kwt_f6x6_3x3_fp16 = (nnp_transform_2d_with_offset) nnp_kwt8x8_3x3_fp16__neonhp;
+				nnp_hwinfo.transforms.owt_f6x6_3x3_fp16_with_bias = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3_fp16_with_bias__neonhp;
+				nnp_hwinfo.transforms.owt_f6x6_3x3_fp16_with_bias_with_relu = (nnp_transform_2d_with_bias) nnp_owt8x8_3x3_fp16_with_bias_with_relu__neonhp;
+			}
+#if !NNP_CONVOLUTION_ONLY
+			nnp_hwinfo.activations.relu = nnp_relu__neon;
+			nnp_hwinfo.activations.inplace_relu = nnp_inplace_relu__neon;
+			nnp_hwinfo.activations.grad_relu = nnp_grad_relu__neon;
+			nnp_hwinfo.activations.softmax = nnp_softmax__psimd;
+			nnp_hwinfo.activations.inplace_softmax = nnp_inplace_softmax__psimd;
+			nnp_hwinfo.sdotxf = (struct sdotxf) {
+				.functions = sdotxf,
+				.fusion = NNP_COUNT_OF(sdotxf),
+			};
+			nnp_hwinfo.shdotxf = (struct shdotxf) {
+				.functions = shdotxf,
+				.fusion = NNP_COUNT_OF(shdotxf),
+			};
+#endif /* !NNP_CONVOLUTION_ONLY */
+			nnp_hwinfo.conv1x1 = (struct convolution) {
+				.mr = 4,
+				.nr = 4,
+				.only_mr_x_nr = nnp_conv1x1_only_4x4__neon,
+				.upto_mr_x_nr = nnp_conv1x1_upto_4x4__neon,
+			};
+			nnp_hwinfo.sgemm = (struct sgemm) {
+				.mr = 6,
+				.nr = 8,
+				#if CPUINFO_ARCH_ARM
+					.only_mr_x_nr = nnp_sgemm_only_6x8__aarch32_neon,
+				#else
+					.only_mr_x_nr = nnp_sgemm_only_6x8__neon,
+				#endif
+				.upto_mr_x_nr = nnp_sgemm_upto_6x8__neon,
+			};
+			#if SVE
+			nnp_hwinfo.sxgemm = (struct sxgemm) {
+                                .mr =16, //sonia changed from 3 to 8
+                                .nr = 16,  // sonia changed from 3 to 8
+                                #if CPUINFO_ARCH_ARM
+                                        .only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4gemm_only_3x3__aarch32_neon,
+                                #else
+                                        .only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4gemm_only_3x3__sve,
+                                #endif
+                                .upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_s4gemm_upto_3x3__sve,
+                        };
+			#else
+			nnp_hwinfo.sxgemm = (struct sxgemm) {
+				.mr =3, //sonia changed from 3 to 8
+				.nr = 3,  // sonia changed from 3 to 8 
+				#if CPUINFO_ARCH_ARM
+					.only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4gemm_only_3x3__aarch32_neon,
+				#else
+					.only_mr_x_nr = (nnp_fast_tuple_gemm_function) nnp_s4gemm_only_3x3__neon,
+				#endif
+				.upto_mr_x_nr = (nnp_full_tuple_gemm_function) nnp_s4gemm_upto_3x3__neon,
+			};
+			#endif
 			#if CPUINFO_ARCH_ARM
 				if (cpuinfo_has_arm_neon_fma()) {
 					nnp_hwinfo.sxgemm.only_mr_x_nr =
@@ -599,6 +761,7 @@ static void init_hwinfo(void) {
 }
 
 enum nnp_status nnp_initialize(void) {
+	//printf("\n I am in nnp initialize\n");
 	if (!cpuinfo_initialize()) {
 		return nnp_status_out_of_memory;
 	}

@@ -1,0 +1,24 @@
+CMakeFiles/nnpack.dir/src/neon/blas/s4c2gemm-conjb.c.o: \
+ /home/soniar/naiveDarknetNNPACKARMSVE/NNPACK/src/neon/blas/s4c2gemm-conjb.c \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/stdc-predef.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/lib/gcc/aarch64-none-linux-gnu/10.2.1/include/stddef.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/lib/gcc/aarch64-none-linux-gnu/10.2.1/include/stdint.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/stdint.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/libc-header-start.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/features.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/sys/cdefs.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/wordsize.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/long-double.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/gnu/stubs.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/gnu/stubs-lp64.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/types.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/timesize.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/typesizes.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/time64.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/wchar.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/stdint-intn.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu/libc/usr/include/bits/stdint-uintn.h \
+ /home/soniar/naiveDarknetNNPACKARMSVE/NNPACK/include/nnpack/arm_neon.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/lib/gcc/aarch64-none-linux-gnu/10.2.1/include/arm_neon.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/lib/gcc/aarch64-none-linux-gnu/10.2.1/include/arm_fp16.h \
+ /home/soniar/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/lib/gcc/aarch64-none-linux-gnu/10.2.1/include/arm_bf16.h

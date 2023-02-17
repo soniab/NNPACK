@@ -76,7 +76,9 @@ void nnp_s4c2gemm_conjb_transc_only_2x2__psimd(size_t k, size_t update, const fl
 void nnp_s4c2gemm_conjb_transc_upto_2x2__psimd(uint32_t mr, uint32_t nr, size_t k, size_t update, const float* a, const float* b, float* c, size_t row_stride_c);
 
 void nnp_s4gemm_only_3x3__neon(size_t k, size_t update, const float* a, const float* b, float* c, size_t row_stride_c);
+void nnp_s4gemm_only_3x3__sve(size_t k, size_t update, const float* a, const float* b, float* c, size_t row_stride_c);
 void nnp_s4gemm_upto_3x3__neon(uint32_t mr, uint32_t nr, size_t k, size_t update, const float* a, const float* b, float* c, size_t row_stride_c);
+void nnp_s4gemm_upto_3x3__sve(uint32_t mr, uint32_t nr, size_t k, size_t update, const float* a, const float* b, float* c, size_t row_stride_c);
 
 void nnp_s4gemm_only_3x3__aarch32_neon(size_t k, size_t update, const float* a, const float* b, float* c, size_t row_stride_c);
 void nnp_s4gemm_only_3x3__aarch32_neon2(size_t k, size_t update, const float* a, const float* b, float* c, size_t row_stride_c);

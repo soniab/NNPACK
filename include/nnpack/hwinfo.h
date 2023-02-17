@@ -45,6 +45,7 @@ struct cache_blocking_info {
 typedef void (*nnp_transform_2d)(const void*, void*, size_t, size_t, uint32_t, uint32_t);
 typedef void (*nnp_transform_2d_with_bias)(const void*, void*, const void*, size_t, size_t, uint32_t, uint32_t);
 typedef void (*nnp_transform_2d_with_offset)(const void*, void*, size_t, size_t, uint32_t, uint32_t, uint32_t, uint32_t);
+typedef void (*nnp_transform_2d_with_offset_intertile)(const void*,const void*, const void*, const void*, void*,void*, void*, void*, size_t, size_t, uint32_t, uint32_t, uint32_t, uint32_t);
 
 typedef void (*nnp_fast_sgemm_function)(size_t, size_t, const float*, const float*, float*, size_t);
 typedef void (*nnp_full_sgemm_function)(uint32_t, uint32_t, size_t, size_t, const float*, const float*, float*, size_t);
@@ -82,6 +83,7 @@ struct transforms {
 	nnp_transform_2d_with_bias ifft16x16_with_bias_with_relu;
 	nnp_transform_2d_with_offset iwt_f6x6_3x3_with_offset_and_store;
 	nnp_transform_2d_with_offset iwt_f6x6_3x3_with_offset_and_stream;
+	nnp_transform_2d_with_offset_intertile iwt_f6x6_3x3_with_offset_and_stream_intertile;  // added by sonia
 	nnp_transform_2d_with_offset kwt_f6x6_3x3;
 #if !NNP_INFERENCE_ONLY
 	nnp_transform_2d_with_offset kwt_f6x6_3Rx3R;
@@ -174,7 +176,8 @@ struct hardware_info {
 	bool initialized;
 	bool supported;
 	uint32_t simd_width;
-
+	 int sve_simd_width;
+	 int globalinterchannels;
 	struct cache_hierarchy_info cache;
 	struct cache_blocking_info blocking;
 

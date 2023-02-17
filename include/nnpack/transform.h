@@ -53,13 +53,26 @@ void nnp_owt8x8_3x3_with_bias__psimd(const float m[], float s[], const float bia
 void nnp_owt8x8_3x3_with_bias_with_relu__psimd(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
 
 void nnp_iwt8x8_3x3_with_offset__neon(const float d[], float wd[], size_t stride_d, size_t stride_wd, uint32_t row_count, uint32_t column_count, uint32_t row_offset, uint32_t column_offset);
+void nnp_iwt8x8_3x3_with_offset__sve(const float d[], float wd[], size_t stride_d, size_t stride_wd, uint32_t row_count, uint32_t column_count, uint32_t row_offset, uint32_t column_offset);
 void nnp_kwt8x8_3x3__neon(const float g[], float wg[], size_t stride_g, size_t stride_wg, uint32_t, uint32_t, uint32_t, uint32_t);
+void nnp_kwt8x8_3x3__sve(const float g[], float wg[], size_t stride_g, size_t stride_wg, uint32_t, uint32_t, uint32_t, uint32_t);
 void nnp_kwt8x8_3Rx3R__neon(const float g[], float wg[], size_t stride_g, size_t stride_wg, uint32_t, uint32_t, uint32_t, uint32_t);
 void nnp_owt8x8_3x3__neon(const float m[], float s[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count, uint32_t, uint32_t);
+void nnp_owt8x8_3x3__sve(const float m[], float s[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count, uint32_t, uint32_t);
+void nnp_iwt8x8_3x3_with_offset__sve_intertile(const float d[],const float d1[], const float d2[], const float d3[], float wd[],float wd1[], float wd2[], float wd3[], size_t stride_d, size_t stride_wd, uint32_t row_count, uint32_t column_count, uint32_t row_offset, uint32_t column_offset);
+void nnp_iwt8x8_3x3_with_offset__sve_intertile1(const float *d[], float **wd, size_t stride_d, size_t stride_wd, uint32_t row_count, uint32_t column_count, uint32_t row_offset, uint32_t column_offset);
+void nnp_kwt8x8_3x3__sve_intertile(const float *g[], float *wg[], size_t stride_g, size_t stride_wg, uint32_t, uint32_t, uint32_t, uint32_t);
+void nnp_owt8x8_3x3s2_with_bias__sve_intertile(const float *m[], float *s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
+
+
 void nnp_owt8x8_3x3_with_bias__neon(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
+void nnp_owt8x8_3x3_with_bias__sve(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
 void nnp_owt8x8_3x3_with_bias_with_relu__neon(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
+void nnp_owt8x8_3x3_with_bias_with_relu__sve(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
 void nnp_owt8x8_3x3s2_with_bias__neon(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
+void nnp_owt8x8_3x3s2_with_bias__sve(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
 void nnp_owt8x8_3x3s2_with_bias_with_relu__neon(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
+void nnp_owt8x8_3x3s2_with_bias_with_relu__sve(const float m[], float s[], const float bias[], size_t stride_m, size_t stride_s, uint32_t row_count, uint32_t column_count);
 
 void nnp_iwt8x8_3x3_fp16_with_offset__neonhp(const float d[], void* wd, size_t stride_d, size_t stride_wd, uint32_t row_count, uint32_t column_count, uint32_t row_offset, uint32_t column_offset);
 void nnp_kwt8x8_3x3_fp16__neonhp(const float g[], void* wg, size_t stride_g, size_t stride_wg, uint32_t, uint32_t, uint32_t, uint32_t);

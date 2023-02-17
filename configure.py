@@ -4,7 +4,7 @@
 import confu
 parser = confu.standard_parser()
 parser.add_argument("--backend", dest="backend", default="auto",
-                    choices=["auto", "psimd", "scalar"])
+                    choices=["auto", "psimd", "scalar", "arm"])
 parser.add_argument("--inference-only", dest="inference_only", default=False,
                     action="store_true",
                     help="Build only inference/forward pass functions to reduce library size")
@@ -26,6 +26,8 @@ def main(args):
             backend = "scalar"
         else:
             backend = "psimd"
+
+backend = "arm"
 
     build = confu.Build.from_options(options)
 
@@ -135,6 +137,51 @@ def main(args):
                     build.cc("scalar/blas/sdotxf.c"),
                     build.cc("scalar/blas/shdotxf.c"),
                 ]
+       # elif backend == "sve":
+       #     from confu import arm
+       #     with build.options(isa=arm.neon+arm.fp16 if options.target.is_arm else None):
+       #         arch_nnpack_objects = [
+       #             # Transformations
+       #             build.cc("psimd/2d-fourier-8x8.c"),
+       #             build.cc("psimd/2d-fourier-16x16.c"),
+       #             build.cc("sve/2d-winograd-8x8-3x3.c"),
+       #             build.cc("neon/2d-winograd-8x8-3x3-fp16.c"),
+       #             # Tuple GEMM
+       #             build.cc("neon/blas/h4gemm.c"),
+       #             build.cc("sve/blas/s4gemm.c"),
+       #             build.cc("neon/blas/c4gemm-conjb.c"),
+       #             build.cc("neon/blas/s4c2gemm-conjb.c"),
+       #             # Direct convolution
+       #             build.cc("neon/blas/conv1x1.c"),
+       #             # BLAS microkernels
+       #             build.cc("neon/blas/sgemm.c"),
+       #         ]
+       #         if not options.inference_only:
+       #             arch_nnpack_objects += [
+       #                 # Transformations
+       #                 build.cc("psimd/2d-winograd-8x8-3x3.c"),
+       #                 # Tuple GEMM
+       #                 build.cc("neon/blas/c4gemm.c"),
+       #                 build.cc("neon/blas/s4c2gemm.c"),
+       #                 build.cc("neon/blas/c4gemm-conjb-transc.c"),
+       #                 build.cc("neon/blas/s4c2gemm-conjb-transc.c"),
+       #             ]
+       #         if not options.convolution_only:
+       #             arch_nnpack_objects += [
+       #                 # ReLU and Softmax
+       #                 build.cc("neon/relu.c"),
+       #                 build.cc("psimd/softmax.c"),
+       #                 # BLAS microkernels
+       #                 build.cc("neon/blas/sdotxf.c"),
+       #                 build.cc("psimd/blas/shdotxf.c"),
+       #             ]
+       #     if options.target.is_arm:
+       #         # Functions implemented in assembly
+       #         arch_nnpack_objects += [
+       #             build.cc("neon/blas/h4gemm-aarch32.S"),
+       #             build.cc("neon/blas/s4gemm-aarch32.S"),
+       #             build.cc("neon/blas/sgemm-aarch32.S"),
+       #         ]
         elif backend == "arm":
             from confu import arm
             with build.options(isa=arm.neon+arm.fp16 if options.target.is_arm else None):
@@ -143,10 +190,12 @@ def main(args):
                     build.cc("psimd/2d-fourier-8x8.c"),
                     build.cc("psimd/2d-fourier-16x16.c"),
                     build.cc("neon/2d-winograd-8x8-3x3.c"),
+                    build.cc("sve/2d-winograd-8x8-3x3_sve.c"),
                     build.cc("neon/2d-winograd-8x8-3x3-fp16.c"),
                     # Tuple GEMM
                     build.cc("neon/blas/h4gemm.c"),
                     build.cc("neon/blas/s4gemm.c"),
+                    build.cc("neon/blas/s4gemm_sve.c"),
                     build.cc("neon/blas/c4gemm-conjb.c"),
                     build.cc("neon/blas/s4c2gemm-conjb.c"),
                     # Direct convolution

@@ -20,6 +20,7 @@ void nnp_iwt8x8_3x3_with_offset__neon(
 	uint32_t row_offset,
 	uint32_t column_offset)
 {
+	printf("going in");
 	NNP_SIMD_ALIGN float32x4_t wd[16];
 	if NNP_LIKELY(row_count == 8 && column_count == 8 && row_offset == 0 && column_offset == 0) {
 		// Fast path where we can directly load `data` into `wd`.
@@ -103,6 +104,7 @@ void nnp_kwt8x8_3x3__neon(
 	uint32_t row_offset,
 	uint32_t column_offset)
 {
+	printf("going in");
 	transform_stride /= sizeof(float);
 
 	const float32x4_t g0 = vld1q_f32(g);
@@ -193,6 +195,7 @@ void nnp_owt8x8_3x3__neon(
 	uint32_t row_offset,
 	uint32_t column_offset)
 {
+	printf("going in");
 	NNP_SIMD_ALIGN float buffer[8 * 6];
 	float*restrict qbuffer = buffer;
 	float*restrict dbuffer = buffer + 32;
@@ -304,6 +307,7 @@ void nnp_owt8x8_3x3_with_bias__neon(
 	uint32_t row_count,
 	uint32_t column_count)
 {
+	printf("going in");
 	NNP_SIMD_ALIGN float buffer[8 * 6];
 	float*restrict qbuffer = buffer;
 	float*restrict dbuffer = buffer + 32;

@@ -7,6 +7,8 @@ INCLUDE(CheckCSourceCompiles)
 PROJECT(NNPACK C CXX ASM)
 
 # ---[ Options.
+set (CMAKE_CXX_FLAGS "-march=armv8-a+sve -static")
+set (CMAKE_C_FLAGS "-march=armv8-a+sve -static")
 SET(NNPACK_BACKEND "auto" CACHE STRING "Backend for micro-kernels implementation")
 SET_PROPERTY(CACHE NNPACK_BACKEND PROPERTY STRINGS auto psimd scalar)
 OPTION(NNPACK_CONVOLUTION_ONLY "Build only NNPACK functions for convolutional layer" OFF)
@@ -15,7 +17,6 @@ OPTION(NNPACK_CUSTOM_THREADPOOL "Build NNPACK for custom thread pool" OFF)
 SET(NNPACK_LIBRARY_TYPE "default" CACHE STRING "Type of library (shared, static, or default) to build")
 SET_PROPERTY(CACHE NNPACK_LIBRARY_TYPE PROPERTY STRINGS default static shared)
 OPTION(NNPACK_BUILD_TESTS "Build NNPACK unit tests" ON)
-
 # ---[ CMake options
 IF(NNPACK_BUILD_TESTS)
   ENABLE_TESTING()
@@ -24,7 +25,7 @@ ENDIF()
 MACRO(NNPACK_TARGET_ENABLE_C99 target)
   IF(${CMAKE_VERSION} VERSION_LESS "3.1")
     IF(NOT MSVC)
-      TARGET_COMPILE_OPTIONS(${target} PRIVATE -std=c99)
+      TARGET_COMPILE_OPTIONS(${target} PRIVATE -std=c99 -march=armv8-a+sve)
     ENDIF()
   ELSE()
     SET_TARGET_PROPERTIES(${target} PROPERTIES
@@ -104,6 +105,9 @@ IF(NNPACK_BACKEND STREQUAL "auto")
     SET(NNPACK_BACKEND "psimd")
   ENDIF()
 ENDIF()
+
+
+set(NNPACK_BACKEND "neon")
 
 IF(NNPACK_BACKEND STREQUAL "x86-64")
   # ---[ We need a Python interpreter to build PeachPy sources for x86-64
@@ -339,10 +343,12 @@ ELSEIF(NNPACK_BACKEND STREQUAL "neon")
     src/psimd/2d-fourier-8x8.c
     src/psimd/2d-fourier-16x16.c
     src/neon/2d-winograd-8x8-3x3.c
+    src/sve/2d-winograd-8x8-3x3_sve.c
     src/neon/2d-winograd-8x8-3x3-fp16.c
     # Tuple GEMM
     src/neon/blas/h4gemm.c
     src/neon/blas/s4gemm.c
+    src/sve/blas/s4gemm_sve.c
     src/neon/blas/c4gemm-conjb.c
     src/neon/blas/s4c2gemm-conjb.c
     # Direct convolution
@@ -454,9 +460,9 @@ ENDIF()
 NNPACK_TARGET_ENABLE_C99(nnpack)
 IF(IOS OR CMAKE_SYSTEM_PROCESSOR MATCHES "^(armv5te|armv7-a|armv7l)$")
   IF(IOS AND NNPACK_BACKEND STREQUAL "neon")
-    SET_PROPERTY(SOURCE ${NNPACK_BACKEND_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon-vfpv4 ")
+    SET_PROPERTY(SOURCE ${NNPACK_BACKEND_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon-vfpv4 -march=armv8-a+sve")
   ELSE()
-    SET_PROPERTY(SOURCE ${NNPACK_BACKEND_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon-fp16 ")
+    SET_PROPERTY(SOURCE ${NNPACK_BACKEND_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -mfpu=neon-fp16 -march=armv8-a+sve")
   ENDIF()
 
   INCLUDE(CheckCCompilerFlag)
@@ -467,7 +473,7 @@ IF(IOS OR CMAKE_SYSTEM_PROCESSOR MATCHES "^(armv5te|armv7-a|armv7l)$")
 ENDIF()
 SET_PROPERTY(SOURCE ${NNPACK_INIT_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -Os ")
 IF(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
-  SET_PROPERTY(SOURCE ${NNPACK_LAYER_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O2 ")
+  SET_PROPERTY(SOURCE ${NNPACK_LAYER_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O2 -march=armv8-a+sve")
 ENDIF()
 IF(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   SET_PROPERTY(SOURCE ${NNPACK_BACKEND_SRCS} APPEND_STRING PROPERTY COMPILE_FLAGS " -O3 ")
