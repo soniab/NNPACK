@@ -12,7 +12,7 @@ void nnp_s4gemm_only_3x3__neon(
 	float c[restrict static 1],
 	size_t row_stride_c)
 {
-	printf("going in");
+//	printf("going in");
 	float32x4_t acc00 = vdupq_n_f32(0.0f), acc01 = vdupq_n_f32(0.0f), acc02 = vdupq_n_f32(0.0f);
 	float32x4_t acc10 = vdupq_n_f32(0.0f), acc11 = vdupq_n_f32(0.0f), acc12 = vdupq_n_f32(0.0f);
 	float32x4_t acc20 = vdupq_n_f32(0.0f), acc21 = vdupq_n_f32(0.0f), acc22 = vdupq_n_f32(0.0f);
@@ -73,7 +73,7 @@ void nnp_s4gemm_upto_3x3__neon(
 	float c[restrict static 1],
 	size_t row_stride_c)
 {
-	printf("going in");
+	//printf("going in");
 	float32x4_t acc00 = vdupq_n_f32(0.0f), acc01 = vdupq_n_f32(0.0f), acc02 = vdupq_n_f32(0.0f);
 	float32x4_t acc10 = vdupq_n_f32(0.0f), acc11 = vdupq_n_f32(0.0f), acc12 = vdupq_n_f32(0.0f);
 	float32x4_t acc20 = vdupq_n_f32(0.0f), acc21 = vdupq_n_f32(0.0f), acc22 = vdupq_n_f32(0.0f);

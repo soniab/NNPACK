@@ -840,7 +840,8 @@ void* memory_block = NULL;
 				#endif
 				gettimeofday(&endtime2,NULL);
 				double totaltime = ((endtime2.tv_sec +  .000001*endtime2.tv_usec) - (starttime2.tv_sec  +  .000001*starttime2.tv_usec));
-					
+			
+				printf("kernel transformation time = %f\n", totaltime);		
 				} else {
 					kernel_transform = (void*) kernel + input_channels_block_start * output_channels * transform_tile_size;
 					
@@ -1803,8 +1804,9 @@ enum nnp_status nnp_convolution_inference(
 			goto cleanup;
 	}
 
-	if(SVE ==1)
-	{
+	//if(SVE ==1)
+	#if SVE
+	
 		switch (algorithm) {
 			case nnp_convolution_algorithm_wt8x8:
 				 status = compute_fast_convolution_inference_sve(
@@ -1818,8 +1820,8 @@ enum nnp_status nnp_convolution_inference(
 			default:
 				printf("Not this");
 		}
-	}
-	else {
+	
+	#else 
 	switch (algorithm) {
 		case nnp_convolution_algorithm_wt8x8:
 		case nnp_convolution_algorithm_wt8x8_fp16:
@@ -1859,7 +1861,8 @@ enum nnp_status nnp_convolution_inference(
 			break;
 		case nnp_convolution_algorithm_auto:
 			NNP_UNREACHABLE;
-	}}
+	}
+	#endif
 
 cleanup:
 	NNP_TOTAL_END(profile)

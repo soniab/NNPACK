@@ -20,7 +20,6 @@ void nnp_iwt8x8_3x3_with_offset__neon(
 	uint32_t row_offset,
 	uint32_t column_offset)
 {
-	printf("going in");
 	NNP_SIMD_ALIGN float32x4_t wd[16];
 	if NNP_LIKELY(row_count == 8 && column_count == 8 && row_offset == 0 && column_offset == 0) {
 		// Fast path where we can directly load `data` into `wd`.
@@ -104,7 +103,7 @@ void nnp_kwt8x8_3x3__neon(
 	uint32_t row_offset,
 	uint32_t column_offset)
 {
-	printf("going in");
+	printf("going in kernel");
 	transform_stride /= sizeof(float);
 
 	const float32x4_t g0 = vld1q_f32(g);
@@ -195,7 +194,7 @@ void nnp_owt8x8_3x3__neon(
 	uint32_t row_offset,
 	uint32_t column_offset)
 {
-	printf("going in");
+	//printf("going in");
 	NNP_SIMD_ALIGN float buffer[8 * 6];
 	float*restrict qbuffer = buffer;
 	float*restrict dbuffer = buffer + 32;
@@ -307,17 +306,17 @@ void nnp_owt8x8_3x3_with_bias__neon(
 	uint32_t row_count,
 	uint32_t column_count)
 {
-	printf("going in");
+	//printf("going in");
 	NNP_SIMD_ALIGN float buffer[8 * 6];
 	float*restrict qbuffer = buffer;
 	float*restrict dbuffer = buffer + 32;
-	float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
+	//float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
 	for (uint32_t col = 0; col < 2; col++) {
 		const float32x4_t m0 = vld1q_f32(transform); transform += transform_stride;
 		float32x4_t m1 = vld1q_f32(transform); transform += transform_stride;
 		/* The only difference in the with_bias vs non with_bias case. */
-		m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
-		vbias = vmov_n_f32(0.0f);
+	//	m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
+	//	vbias = vmov_n_f32(0.0f);
 		const float32x4_t m2 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m3 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m4 = vld1q_f32(transform); transform += transform_stride;
@@ -425,13 +424,13 @@ void nnp_owt8x8_3x3s2_with_bias__neon(
 	NNP_SIMD_ALIGN float buffer[8 * 6];
 	float*restrict qbuffer = buffer;
 	float*restrict dbuffer = buffer + 32;
-	float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
+	//float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
 	for (uint32_t col = 0; col < 2; col++) {
 		const float32x4_t m0 = vld1q_f32(transform); transform += transform_stride;
 		float32x4_t m1 = vld1q_f32(transform); transform += transform_stride;
 		/* The only difference in the with_bias vs non with_bias case. */
-		m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
-		vbias = vmov_n_f32(0.0f);
+	//	m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
+//		vbias = vmov_n_f32(0.0f);
 		const float32x4_t m2 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m3 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m4 = vld1q_f32(transform); transform += transform_stride;
@@ -496,13 +495,13 @@ void nnp_owt8x8_3x3_with_bias_with_relu__neon(
 	NNP_SIMD_ALIGN float buffer[8 * 6];
 	float*restrict qbuffer = buffer;
 	float*restrict dbuffer = buffer + 32;
-	float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
+//	float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
 	for (uint32_t col = 0; col < 2; col++) {
 		const float32x4_t m0 = vld1q_f32(transform); transform += transform_stride;
 		float32x4_t m1 = vld1q_f32(transform); transform += transform_stride;
 		/* The only difference in the with_bias vs non with_bias case. */
-		m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
-		vbias = vmov_n_f32(0.0f);
+//		m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
+//		vbias = vmov_n_f32(0.0f);
 		const float32x4_t m2 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m3 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m4 = vld1q_f32(transform); transform += transform_stride;
@@ -612,13 +611,13 @@ void nnp_owt8x8_3x3s2_with_bias_with_relu__neon(
 	NNP_SIMD_ALIGN float buffer[8 * 6];
 	float*restrict qbuffer = buffer;
 	float*restrict dbuffer = buffer + 32;
-	float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
+//	float32x2_t vbias = vreinterpret_f32_u64(vshl_n_u64(vreinterpret_u64_f32(vld1_dup_f32(bias)), 32));
 	for (uint32_t col = 0; col < 2; col++) {
 		const float32x4_t m0 = vld1q_f32(transform); transform += transform_stride;
 		float32x4_t m1 = vld1q_f32(transform); transform += transform_stride;
 		/* The only difference in the with_bias vs non with_bias case. */
-		m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
-		vbias = vmov_n_f32(0.0f);
+//		m1 = vcombine_f32(vadd_f32(vget_low_f32(m1), vbias), vget_high_f32(m1));
+//		vbias = vmov_n_f32(0.0f);
 		const float32x4_t m2 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m3 = vld1q_f32(transform); transform += transform_stride;
 		const float32x4_t m4 = vld1q_f32(transform); transform += transform_stride;
