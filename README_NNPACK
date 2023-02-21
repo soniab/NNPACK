@@ -1,0 +1,9 @@
+Build NNPACK
+
+1) mkdir build
+2) cd build
+3) export CC=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
+4) export CXX=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++
+5) cmake ..
+9) make (this will create a static library)
+
