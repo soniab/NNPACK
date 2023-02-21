@@ -1,17 +1,19 @@
 Build NNPACK for ARMSVE 
 
-To make enable for SVE use
-#define SVE 1 (enable macro for SVE) in the include/nnpack.h file. 
+Download:
+    git clone https://github.com/soniab/NNPACK.git
+
+Building:
+    macro for SVE is enabled in include/nnpack.h file. 
+    to build the NNPACK for ARMSVE architecture follow the instructions
+        1) mkdir build 
+        2) cd build
+        3) export CC=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc  [set path of the compiler]
+        4) export CXX=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++ [set path of the compiler]
+        5) 'cmake ..' to configure NNPACK 
+        6) 'make' to create a static library libnnpack.a in build folder only
 
 
-Detailed building instructions steps:
-1) mkdir build 
-2) cd build
-3) export CC=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc  [set path of the compiler]
-4) export CXX=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++ [set path of the compiler]
-5) 'cmake ..' to configure NNPACK 
-6) 'make' to create a static library libnnpack.a in build folder only
 
 
-please note that NNPACK with SVE support is provided only for single thread. 
-
+We note that NNPACK with SVE support is provided only for single thread. Winograd implementation for ARM-SVE has been tested for 512-bit, 1024-bit and 2048-bit vector lengths using Darknet framework. 
