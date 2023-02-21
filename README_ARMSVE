@@ -1,0 +1,17 @@
+Build NNPACK for ARMSVE 
+
+To make enable for SVE use
+#define SVE 1 (enable macro for SVE) in the include/nnpack.h file. 
+
+
+Detailed building instructions steps:
+1) mkdir build 
+2) cd build
+3) export CC=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc  [set path of the compiler]
+4) export CXX=~/gcc-arm-10.2-2020.11-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-g++ [set path of the compiler]
+5) 'cmake ..' to configure NNPACK 
+6) 'make' to create a static library libnnpack.a in build folder only
+
+
+please note that NNPACK with SVE support is provided only for single thread. 
+
