@@ -1,7 +1,7 @@
 Build NNPACK for ARMSVE 
 
 Download:
-    git clone https://github.com/soniab/NNPACK.git
+    git clone https://github.com/chalmers-hart/NNPACK.git
 
 Building:
     macro for SVE is enabled in include/nnpack.h file. 
